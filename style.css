@@ -1,0 +1,34 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    background:whitesmoke;
+
+}
+
+form{
+    background-color: #bd9898;
+    padding:20px;
+    border-radius:5px;
+    width:300px;
+    margin:30px auto;  /* centers the form on the page */
+
+}
+
+
+/* style all input feilds and dropdown button */
+input, select{
+      width:100%;
+      padding:8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;;
+      border-radius: 4px;
+      box-sizing: border-box;
+
+}
+
+label{
+    color:blue;
+
+
+}
