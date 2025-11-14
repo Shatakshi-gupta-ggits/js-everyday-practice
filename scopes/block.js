@@ -1,5 +1,6 @@
 // Variables declared inside a specific block (represented by {}) are not accessible from outside the block. It doesn’t work with the var
 // keyword, so you can use only let or const keywords with it.
+
 // When to USe Block Scope
 // For variables with scope limited to a specific block of the code, such as for loops, while loops, and if statements.
 // For example, temporary variables used for conditionally executing code blocks.
