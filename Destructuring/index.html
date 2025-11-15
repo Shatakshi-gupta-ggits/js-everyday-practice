@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Destructuring</title>
+  
+</head>
+<body>
+
+    <!-- <script src="spread.js"></script> -->
+<script>
+    let names = ['tony', 'bbyy','pintu','chiku', 'tillu'];
+    // let winnerr = names[0];
+    // let runnerUp = names[1];
+    // let secondRunnerUp = names[2];
+// let [winner, runnerUp, secondrunnerUp, ...others] = names;
+// document.write(winner);
+// document.write(runnerUp);
+// document.write(secondrunnerUp);
+
+
+//destructuring (objects)
+
+const student = {
+    name: "shatakshi",
+    age: 14,
+    class:9,
+    sub: ['english','math','science'],
+    username :'shat123',
+    pass:'123',
+    city:'pune'
+};
+
+// let username = student.username;
+// let password = student.password;
+
+// let {username, pass} = student;
+let {username : user,pass: secret, city: place ='mumbai'} = student;
+
+</script>
+
+</body>
+</html>
