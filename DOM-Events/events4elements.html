@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Page</title>
+    <style>
+        .box {
+            height: 100px;
+            width: 100px;
+            background-color: pink;
+            border: 1px solid black;
+            transition: all 0.3s ease;
+        }
+        
+        p {
+            cursor: pointer;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        p:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <p>This is a paragraph - Click me!</p>
+    <div class="box"></div>
+    
+    <script>
+        let p = document.querySelector("p");
+        let box = document.querySelector(".box");
+
+        p.addEventListener("click", function(){
+            console.log("Para was clicked");
+            
+            // Make visible changes
+            p.style.color = "red";
+            p.textContent = "Paragraph was clicked!";
+            
+            // Change the box
+            box.style.backgroundColor = "lightblue";
+            box.style.transform = "scale(1.2)";
+        });
+
+        // Add click event for the box too
+        box.addEventListener("click", function() {
+            console.log("Box was clicked");
+            box.style.backgroundColor = "lightgreen";
+            this.textContent = "Clicked!";
+        });
+    </script>
+</body>
+</html>
