@@ -10,15 +10,34 @@
 </head>
 <body>
    <button>my button</button>
+   <input>
 
     <script>
     let btn = document.querySelector("button");
+    let inp = document.querySelector("input");
 
+    //    btn.addEventListener("dblclick", function(event){
+    //     console.log(event);
+    //     console.log("button clicked");
+    // });
+//default event 
     btn.addEventListener("click", function(event){
         console.log(event);
         console.log("button clicked");
     });
 
+//keyboard event
+inp.addEventListener("keydown", function(event){
+    console.log("key =",event.key);
+    console.log("code =",event.code);
+       console.log("Key was pressed");
+});
+
+inp.addEventListener("keyleft", function(event){
+    console.log("key =",event.key);
+    console.log("code =",event.code);
+       console.log("Key was pressed");
+});
     </script>
    
 </body>

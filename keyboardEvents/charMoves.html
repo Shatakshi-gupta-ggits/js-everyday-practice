@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Web Page</title>
+    <style>
+       input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" placeholder="Type something"> <!-- Fixed input element -->
+    
+    <script>
+        let inp = document.querySelector("input");
+        
+        inp.addEventListener("keydown", function (event) {
+            console.log("code", event.code); // ArrowUp(U), ArrowDown(D), ArrowLeft(L), ArrowRight(R)
+            
+            if (event.code === "ArrowUp") {  // Fixed: Added closing quote and ===
+                console.log("character moves forward");
+            } else if (event.code === "ArrowDown") {  // Fixed: Added ===
+                console.log("character moves backward");
+            } else if (event.code === "ArrowLeft") {  // Fixed: Added ===
+                console.log("character moves left");
+            } else if (event.code === "ArrowRight") {  // Fixed: Added === and used {}
+                console.log("character moves right");
+            }
+        });
+    </script>
+</body>
+</html>
