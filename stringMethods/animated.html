@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Event Loop Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .event-loop-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .execution-context, .web-apis {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .queue-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .queue {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            min-height: 200px;
+        }
+        
+        .queue-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .event-loop {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: #4a00e0;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background: #8e2de2;
+            transform: translateY(-2px);
+        }
+        
+        .task {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task.moving {
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .task-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .explanation {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .explanation h2 {
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+        
+        .explanation p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .flow-arrow {
+            font-size: 2rem;
+            text-align: center;
+            margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .priority-high {
+            border-left: 4px solid #ff4757;
+        }
+        
+        .priority-low {
+            border-left: 4px solid #2ed573;
+        }
+        
+        .microtask {
+            border-left: 4px solid #3742fa;
+        }
+        
+        .macro-task {
+            border-left: 4px solid #ffa502;
+        }
+        
+        .animation-active {
+            animation: highlight 1.5s ease;
+        }
+        
+        @keyframes highlight {
+            0% { background-color: rgba(255, 255, 255, 0.1); }
+            50% { background-color: rgba(255, 215, 0, 0.3); }
+            100% { background-color: rgba(255, 255, 255, 0.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JavaScript Event Loop Visualization</h1>
+            <p class="subtitle">Understanding how JavaScript handles asynchronous operations</p>
+        </header>
+        
+        <div class="event-loop-container">
+            <div class="execution-context">
+                <h2 class="section-title">Execution Context</h2>
+                <div class="call-stack">
+                    <h3>Call Stack</h3>
+                    <div id="call-stack">
+                        <div class="task priority-high">
+                            <span class="task-icon">📝</span>
+                            <span>main()</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="web-apis">
+                <h2 class="section-title">Web APIs</h2>
+                <div id="web-apis">
+                    <div class="task">
+                        <span class="task-icon">⏰</span>
+                        <span>setTimeout</span>
+                    </div>
+                    <div class="task">
+                        <span class="task-icon">🌐</span>
+                        <span>DOM API</span>
+                    </div>
+                    <div class="task">
+                        <span class="task-icon">📡</span>
+                        <span>fetch</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flow-arrow">↓</div>
+        
+        <div class="queue-container">
+            <div class="queue">
+                <h3 class="queue-title">Microtask Queue (High Priority)</h3>
+                <div id="microtask-queue">
+                    <div class="task microtask">
+                        <span class="task-icon">⚡</span>
+                        <span>Promise 1</span>
+                    </div>
+                    <div class="task microtask">
+                        <span class="task-icon">⚡</span>
+                        <span>Promise 2</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="queue">
+                <h3 class="queue-title">Callback Queue (Low Priority)</h3>
+                <div id="callback-queue">
+                    <div class="task macro-task">
+                        <span class="task-icon">🖱️</span>
+                        <span>onClick 1</span>
+                    </div>
+                    <div class="task macro-task">
+                        <span class="task-icon">🖱️</span>
+                        <span>onClick 2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flow-arrow">↓</div>
+        
+        <div class="event-loop">
+            <h2 class="section-title">Event Loop</h2>
+            <p>Continuously checks if Call Stack is empty, then processes queues</p>
+            <div class="task" id="event-loop-task">
+                <span class="task-icon">🔄</span>
+                <span>Checking queues...</span>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="add-microtask">Add Microtask</button>
+            <button id="add-macrotask">Add Macrotask</button>
+            <button id="start-demo">Start Demo</button>
+            <button id="reset-demo">Reset Demo</button>
+        </div>
+        
+        <div class="explanation">
+            <h2>How the JavaScript Event Loop Works</h2>
+            <p>The Event Loop is JavaScript's mechanism for handling asynchronous operations. It consists of:</p>
+            
+            <div class="code-block">
+                // Example of different task types<br>
+                console.log("Sync task"); // Executes immediately<br><br>
+                
+                // Microtasks (High Priority)<br>
+                Promise.resolve().then(() => console.log("Microtask"));<br><br>
+                
+                // Macrotasks (Lower Priority)<br>
+                setTimeout(() => console.log("Macrotask"), 0);<br>
+                button.addEventListener('click', () => console.log("Click handler"));
+            </div>
+            
+            <p><strong>Execution Flow:</strong></p>
+            <ol>
+                <li>Synchronous code executes immediately in the Call Stack</li>
+                <li>Async operations are handed off to Web APIs</li>
+                <li>When Web APIs complete, callbacks go to respective queues</li>
+                <li>Event Loop checks if Call Stack is empty</li>
+                <li>Microtasks (Promises) are processed first, until the queue is empty</li>
+                <li>Then one Macrotask (setTimeout, events) is processed</li>
+                <li>Repeat from step 4</li>
+            </ol>
+            
+            <p><strong>Priority Order:</strong></p>
+            <ul>
+                <li>1. Synchronous code (Call Stack)</li>
+                <li>2. Microtasks (Promise callbacks, queueMicrotask)</li>
+                <li>3. Macrotasks (setTimeout, setInterval, I/O, UI events)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const callStack = document.getElementById('call-stack');
+            const microtaskQueue = document.getElementById('microtask-queue');
+            const callbackQueue = document.getElementById('callback-queue');
+            const eventLoopTask = document.getElementById('event-loop-task');
+            const webApis = document.getElementById('web-apis');
+            
+            const addMicrotaskBtn = document.getElementById('add-microtask');
+            const addMacrotaskBtn = document.getElementById('add-macrotask');
+            const startDemoBtn = document.getElementById('start-demo');
+            const resetDemoBtn = document.getElementById('reset-demo');
+            
+            let taskId = 1;
+            let isRunning = false;
+            
+            // Add a microtask to the queue
+            addMicrotaskBtn.addEventListener('click', function() {
+                if (isRunning) return;
+                
+                const newTask = document.createElement('div');
+                newTask.className = 'task microtask';
+                newTask.innerHTML = `<span class="task-icon">⚡</span> <span>Promise ${taskId++}</span>`;
+                microtaskQueue.appendChild(newTask);
+            });
+            
+            // Add a macrotask to the queue
+            addMacrotaskBtn.addEventListener('click', function() {
+                if (isRunning) return;
+                
+                const newTask = document.createElement('div');
+                newTask.className = 'task macro-task';
+                newTask.innerHTML = `<span class="task-icon">🖱️</span> <span>onClick ${taskId++}</span>`;
+                callbackQueue.appendChild(newTask);
+            });
+            
+            // Start the demo animation
+            startDemoBtn.addEventListener('click', function() {
+                if (isRunning) return;
+                isRunning = true;
+                
+                // Clear any existing tasks in call stack except main()
+                while (callStack.children.length > 1) {
+                    callStack.removeChild(callStack.lastChild);
+                }
+                
+                runEventLoopCycle();
+            });
+            
+            // Reset the demo
+            resetDemoBtn.addEventListener('click', function() {
+                isRunning = false;
+                taskId = 1;
+                
+                // Clear all queues
+                while (callStack.children.length > 1) {
+                    callStack.removeChild(callStack.lastChild);
+                }
+                
+                while (microtaskQueue.children.length > 0) {
+                    microtaskQueue.removeChild(microtaskQueue.lastChild);
+                }
+                
+                while (callbackQueue.children.length > 0) {
+                    callbackQueue.removeChild(callbackQueue.lastChild);
+                }
+                
+                // Reset event loop text
+                eventLoopTask.innerHTML = `<span class="task-icon">🔄</span> <span>Checking queues...</span>`;
+                eventLoopTask.classList.remove('animation-active');
+            });
+            
+            // Simulate one cycle of the event loop
+            function runEventLoopCycle() {
+                if (!isRunning) return;
+                
+                // Highlight the event loop
+                eventLoopTask.classList.add('animation-active');
+                eventLoopTask.innerHTML = `<span class="task-icon">🔄</span> <span>Processing queues...</span>`;
+                
+                setTimeout(() => {
+                    // Process microtasks first (high priority)
+                    if (microtaskQueue.children.length > 0) {
+                        processMicrotask();
+                    } 
+                    // Then process one macrotask (lower priority)
+                    else if (callbackQueue.children.length > 0) {
+                        processMacrotask();
+                    }
+                    
+                    // Reset event loop
+                    setTimeout(() => {
+                        eventLoopTask.innerHTML = `<span class="task-icon">🔄</span> <span>Checking queues...</span>`;
+                        eventLoopTask.classList.remove('animation-active');
+                        
+                        // Continue if there are more tasks
+                        if (microtaskQueue.children.length > 0 || callbackQueue.children.length > 0) {
+                            setTimeout(runEventLoopCycle, 1500);
+                        } else {
+                            isRunning = false;
+                        }
+                    }, 800);
+                }, 1000);
+            }
+            
+            // Process a microtask
+            function processMicrotask() {
+                const task = microtaskQueue.children[0];
+                if (!task) return;
+                
+                // Highlight the task being moved
+                task.classList.add('moving');
+                
+                setTimeout(() => {
+                    // Move to call stack
+                    microtaskQueue.removeChild(task);
+                    task.classList.remove('moving');
+                    callStack.appendChild(task);
+                    
+                    // Simulate execution
+                    setTimeout(() => {
+                        callStack.removeChild(task);
+                    }, 800);
+                }, 500);
+            }
+            
+            // Process a macrotask
+            function processMacrotask() {
+                const task = callbackQueue.children[0];
+                if (!task) return;
+                
+                // Highlight the task being moved
+                task.classList.add('moving');
+                
+                setTimeout(() => {
+                    // Move to call stack
+                    callbackQueue.removeChild(task);
+                    task.classList.remove('moving');
+                    callStack.appendChild(task);
+                    
+                    // Simulate execution
+                    setTimeout(() => {
+                        callStack.removeChild(task);
+                    }, 800);
+                }, 500);
+            }
+            
+            // Add initial tasks for demonstration
+            setTimeout(() => {
+                const initialMicrotask = document.createElement('div');
+                initialMicrotask.className = 'task microtask';
+                initialMicrotask.innerHTML = `<span class="task-icon">⚡</span> <span>Promise 1</span>`;
+                microtaskQueue.appendChild(initialMicrotask);
+                
+                const initialMacrotask = document.createElement('div');
+                initialMacrotask.className = 'task macro-task';
+                initialMacrotask.innerHTML = `<span class="task-icon">🖱️</span> <span>onClick 1</span>`;
+                callbackQueue.appendChild(initialMacrotask);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

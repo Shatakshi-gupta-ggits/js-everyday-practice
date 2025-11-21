@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>50 String Methods With Output</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+.box { background: #f7f7f7; padding: 12px; margin-bottom: 15px; border-radius: 8px; }
+pre { background: #000; color: #0f0; padding: 10px; border-radius: 5px; }
+h2 { color: #333; }
+</style>
+</head>
+<body>
+
+<h2>50 String Methods in JavaScript (Programs + Output)</h2>
+
+<div id="output"></div>
+
+<script>
+function show(title, code, output) {
+    document.getElementById("output").innerHTML += `
+        <div class="box">
+            <h3>${title}</h3>
+            <b>Program:</b>
+            <pre>${code}</pre>
+            <b>Output:</b>
+            <pre>${output}</pre>
+        </div>
+    `;
+}
+
+let s = "Hello JavaScript";
+
+show("1. length", `s.length`, s.length);
+show("2. toUpperCase()", `s.toUpperCase()`, s.toUpperCase());
+show("3. toLowerCase()", `s.toLowerCase()`, s.toLowerCase());
+show("4. trim()", `"  Hello  ".trim()`, "Hello");
+show("5. trimStart()", `"   Hi".trimStart()`, "Hi");
+show("6. trimEnd()", `"Hi    ".trimEnd()`, "Hi");
+show("7. charAt()", `s.charAt(1)`, s.charAt(1));
+show("8. charCodeAt()", `s.charCodeAt(0)`, s.charCodeAt(0));
+show("9. at()", `s.at(-1)`, s.at(-1));
+show("10. concat()", `"Hello".concat(" World")`, "Hello World");
+show("11. includes()", `s.includes("Java")`, s.includes("Java"));
+show("12. startsWith()", `s.startsWith("Hello")`, s.startsWith("Hello"));
+show("13. endsWith()", `s.endsWith("Script")`, s.endsWith("Script"));
+show("14. indexOf()", `s.indexOf("Java")`, s.indexOf("Java"));
+show("15. lastIndexOf()", `"hello".lastIndexOf("l")`, "3");
+show("16. replace()", `"I like JS".replace("JS","Python")`, "I like Python");
+show("17. replaceAll()", `"aaa".replaceAll("a","b")`, "bbb");
+show("18. slice()", `s.slice(0,5)`, s.slice(0,5));
+show("19. substring()", `s.substring(6,10)`, s.substring(6,10));
+show("20. substr() (old)", `"JavaScript".substr(4,6)`, "Script");
+show("21. split()", `"a,b,c".split(",")`, `["a","b","c"]`);
+show("22. repeat()", `"Hi ".repeat(3)`, "Hi Hi Hi ");
+show("23. match()", `"abc123".match(/[0-9]/g)`, `["1","2","3"]`);
+show("24. matchAll()", `[... "test".matchAll(/t/g)]`, `[0:"t",3:"t"]`);
+show("25. padStart()", `"5".padStart(4,"0")`, "0005");
+show("26. padEnd()", `"5".padEnd(4,"0")`, "5000");
+show("27. localeCompare()", `"A".localeCompare("B")`, "-1");
+show("28. toString()", `(123).toString()`, "123");
+show("29. valueOf()", `"Hello".valueOf()`, "Hello");
+show("30. search()", `"Hello".search("l")`, "2");
+show("31. normalize()", `"e\u0301".normalize()`, "é");
+show("32. toLocaleLowerCase()", `"HELLO".toLocaleLowerCase()`, "hello");
+show("33. toLocaleUpperCase()", `"hello".toLocaleUpperCase()`, "HELLO");
+show("34. raw()", `String.raw\`Hello\\nWorld\``, "Hello\\nWorld");
+show("35. codePointAt()", `"😀".codePointAt(0)`, "128512");
+show("36. fromCharCode()", `String.fromCharCode(65)`, "A");
+show("37. fromCodePoint()", `String.fromCodePoint(128512)`, "😀");
+show("38. anchor()", `"Hello".anchor("id1")`, `<a name="id1">Hello</a>`);
+show("39. big()", `"Hello".big()`, `<big>Hello</big>`);
+show("40. bold()", `"Hello".bold()`, `<b>Hello</b>`);
+show("41. italics()", `"Hello".italics()`, `<i>Hello</i>`);
+show("42. strike()", `"Hello".strike()`, `<strike>Hello</strike>`);
+show("43. small()", `"Hello".small()`, `<small>Hello</small>`);
+show("44. sup()", `"Hello".sup()`, `<sup>Hello</sup>`);
+show("45. sub()", `"Hello".sub()`, `<sub>Hello</sub>`);
+show("46. link()", `"Google".link("https://google.com")`, `<a href="https://google.com">Google</a>`);
+show("47. fixed()", `"Text".fixed()`, `<tt>Text</tt>`);
+show("48. fontcolor()", `"Hi".fontcolor("red")`, `<font color="red">Hi</font>`);
+show("49. fontsize()", `"Hi".fontsize(5)`, `<font size="5">Hi</font>`);
+show("50. trimLeft()", `"   Test".trimLeft()`, "Test");
+
+</script>
+
+</body>
+</html>

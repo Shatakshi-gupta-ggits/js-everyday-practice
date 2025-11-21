@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <script>
+       
+       // ARRAY METHODS
+       // 33. length
+const arr = [1, 2, 3];
+console.log(arr.length); // 3
+
+// 34. shift()
+const arr1 = [1, 2, 3];
+console.log(arr1.shift()); // 1
+
+// 35. unshift()
+const arr2 = [2, 3];
+console.log(arr2.unshift(1)); // 3 (new length)
+
+// 36. splice()
+const arr3 = [1, 2, 3];
+arr3.splice(1, 1, 4);
+console.log(arr3); // [1, 4, 3]
+
+// 37. slice()
+const arr4 = [1, 2, 3];
+console.log(arr4.slice(1)); // [2, 3]
+
+// 38. includes()
+console.log([1, 2, 3].includes(2)); // true
+
+// 39. indexOf()
+console.log([1, 2, 3].indexOf(2)); // 1
+
+// 40. flat()
+console.log([1, [2, 3]].flat()); // [1, 2, 3]
+
+// 41. flatMap()
+console.log([1, 2].flatMap(x => [x, x*2])); // [1, 2, 2, 4]
+
+// 42. substring() - String method
+console.log("Hello".substring(1, 3)); // "el"
+
+// 43. replace()
+console.log("Hello".replace("l", "x")); // "Hexlo"
+
+// 44. replaceAll()
+console.log("Hello".replaceAll("l", "x")); // "Hexxo"
+
+// 45. split()
+console.log("Hello World".split(" ")); // ["Hello", "World"]
+
+// 46. from() - Array method
+console.log(Array.from("hello")); // ["h", "e", "l", "l", "o"]
+
+// 47. some()
+console.log([1, 2, 3].some(x => x > 2)); // true
+
+// 48. reduceRight()
+console.log([1, 2, 3].reduceRight((acc, val) => acc + val)); // 6
+
+// 49. reduce()
+console.log([1, 2, 3].reduce((acc, val) => acc + val)); // 6
+
+// 50. find()
+console.log([1, 2, 3].find(x => x > 1)); // 2
+
+// 51. findIndex()
+console.log([1, 2, 3].findIndex(x => x > 1)); // 1
+
+// 52. includes()
+console.log([1, 2, 3].includes(2)); // true
+
+// 53. indexOf()
+console.log([1, 2, 3].indexOf(2)); // 1
+    </script>
+</body>
+</html>
