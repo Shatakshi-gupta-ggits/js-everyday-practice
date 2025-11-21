@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Loop Todo Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Event Loop Todo Manager</h1>
+            <p class="subtitle">Visualize JavaScript's Event Loop with Real Tasks</p>
+        </header>
+
+        <!-- Todo Input Section -->
+        <div class="todo-section">
+            <div class="todo-input">
+                <input type="text" id="taskInput" placeholder="Enter a task (e.g., 'Fetch user data', 'Process payment')">
+                <select id="taskType">
+                    <option value="micro">⚡ Microtask (High Priority)</option>
+                    <option value="macro">🖱️ Macrotask (Normal Priority)</option>
+                    <option value="sync">📝 Sync Task (Immediate)</option>
+                </select>
+                <button id="addTodo">Add Task</button>
+            </div>
+            <div class="todo-list">
+                <h3>Your Tasks</h3>
+                <div id="todoItems"></div>
+            </div>
+        </div>
+
+        <!-- Event Loop Visualization -->
+        <div class="visualization-section">
+            <div class="event-loop-container">
+                <div class="execution-context">
+                    <h2 class="section-title">Execution Context</h2>
+                    <div class="call-stack" data-info="Executes synchronous code immediately. Functions run in LIFO (Last In, First Out) order.">
+                        <h3>Call Stack</h3>
+                        <div id="call-stack">
+                            <div class="task sync-task">
+                                <span class="task-icon">📝</span>
+                                <span>main()</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="web-apis" data-info="Browser APIs handle async operations: setTimeout, DOM events, fetch, etc.">
+                    <h2 class="section-title">Web APIs</h2>
+                    <div id="web-apis">
+                        <div class="task api-task">
+                            <span class="task-icon">⏰</span>
+                            <span>Timer API</span>
+                        </div>
+                        <div class="task api-task">
+                            <span class="task-icon">🌐</span>
+                            <span>DOM API</span>
+                        </div>
+                        <div class="task api-task">
+                            <span class="task-icon">📡</span>
+                            <span>Fetch API</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="queue-container">
+                <div class="queue micro-queue" data-info="High priority queue for: Promise callbacks, queueMicrotask, mutation observers">
+                    <h3 class="queue-title">Microtask Queue ⚡</h3>
+                    <div id="microtask-queue"></div>
+                </div>
+                
+                <div class="queue macro-queue" data-info="Normal priority queue for: setTimeout, setInterval, I/O operations, UI events">
+                    <h3 class="queue-title">Callback Queue 🖱️</h3>
+                    <div id="callback-queue"></div>
+                </div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="event-loop" data-info="Continuously checks if Call Stack is empty, then processes Microtasks first, then one Macrotask">
+                <h2 class="section-title">Event Loop 🔄</h2>
+                <div class="task" id="event-loop-task">
+                    <span class="task-icon">🔄</span>
+                    <span>Checking queues...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button id="startExecution">Start Execution</button>
+            <button id="addRandomTask">Add Random Task</button>
+            <button id="clearAll">Clear All</button>
+            <button id="demoMode">Demo Mode</button>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <h3>ℹ️ Hover over any section for details</h3>
+            <div id="hover-info">Hover over a section to see what it does...</div>
+        </div>
+
+        <!-- Real World Examples -->
+        <div class="examples">
+            <h3>💡 Real World Task Examples:</h3>
+            <div class="example-tasks">
+                <button class="example-btn" data-task="Fetch user data from API" data-type="micro">API Call (Micro)</button>
+                <button class="example-btn" data-task="Update UI after 2s" data-type="macro">Delayed UI Update (Macro)</button>
+                <button class="example-btn" data-task="Calculate total price" data-type="sync">Sync Calculation (Sync)</button>
+                <button class="example-btn" data-task="Process payment" data-type="micro">Payment Processing (Micro)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="todo.js"></script>
+</body>
+</html>
