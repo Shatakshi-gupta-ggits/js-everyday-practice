@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document Title</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+</head>
+<body>
+    
+    <script>
+//         console.log("Start");
+
+// setTimeout(() => {
+//     console.log("setTimeout Callback");
+// }, 0);
+
+// Promise.resolve().then(() => {
+//     console.log("Promise Resolved");
+// });
+
+// console.log("End");
+
+class EventLoopProject {
+  constructor() {
+    this.taskQueue = [];
+    this.isProcessing = false;
+  }
+
+  addTask(task, priority = 'normal') {
+    this.taskQueue.push({ task, priority });
+    this.processQueue();
+  }
+
+  async processQueue() {
+    if (this.isProcessing) return;
+    this.isProcessing = true;
+    
+    while (this.taskQueue.length > 0) {
+      const { task } = this.taskQueue.shift();
+      await task();
+      // Yield to event loop between tasks
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+    
+    this.isProcessing = false;
+  }
+}
+
+    </script>
+</body>
+</html>

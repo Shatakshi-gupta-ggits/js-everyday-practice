@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Loop Task Scheduler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel h2 {
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: #4a9eff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        button:hover {
+            background: #2d8cff;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.high-priority {
+            background: #ff4757;
+        }
+
+        button.normal-priority {
+            background: #2ed573;
+        }
+
+        button.low-priority {
+            background: #ffa502;
+        }
+
+        .queue-container {
+            margin-top: 20px;
+        }
+
+        .queue {
+            min-height: 200px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .task.executing {
+            background: rgba(46, 213, 115, 0.3);
+            border-left: 5px solid #2ed573;
+            transform: scale(1.02);
+        }
+
+        .task.high-priority {
+            border-left: 5px solid #ff4757;
+        }
+
+        .task.normal-priority {
+            border-left: 5px solid #2ed573;
+        }
+
+        .task.low-priority {
+            border-left: 5px solid #ffa502;
+        }
+
+        .task-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .task-priority {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .task-status {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .visualization {
+            margin-top: 30px;
+        }
+
+        .event-loop {
+            height: 80px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-loop::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .loop-label {
+            position: absolute;
+            left: 20px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .task-moving {
+            position: absolute;
+            background: #4a9eff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: moveTask 5s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes moveTask {
+            0% {
+                left: 100px;
+                opacity: 1;
+            }
+            50% {
+                left: calc(100% - 150px);
+                opacity: 1;
+            }
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .explanation {
+            margin-top: 30px;
+            line-height: 1.6;
+        }
+
+        .explanation h3 {
+            margin-bottom: 15px;
+        }
+
+        .explanation p {
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Event Loop Task Scheduler</h1>
+            <p class="subtitle">Visualizing JavaScript's Event Loop with a Custom Task Queue</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="panel">
+                <h2>Task Controls</h2>
+                <div class="controls">
+                    <button class="high-priority" id="addHighPriority">Add High Priority Task</button>
+                    <button class="normal-priority" id="addNormalPriority">Add Normal Priority Task</button>
+                    <button class="low-priority" id="addLowPriority">Add Low Priority Task</button>
+                    <button id="addRandomTasks">Add 5 Random Tasks</button>
+                    <button id="clearQueue">Clear Queue</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Tasks in Queue</div>
+                        <div class="stat-value" id="queueCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tasks Completed</div>
+                        <div class="stat-value" id="completedCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Currently Executing</div>
+                        <div class="stat-value" id="executingCount">0</div>
+                    </div>
+                </div>
+
+                <div class="visualization">
+                    <h3>Event Loop Visualization</h3>
+                    <div class="event-loop">
+                        <div class="loop-label">Event Loop</div>
+                        <div class="task-moving">Task</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Task Queue</h2>
+                <div class="queue-container">
+                    <div class="queue" id="taskQueue">
+                        <div class="empty-queue">No tasks in queue. Add some tasks to get started!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel explanation">
+            <h3>How This Works</h3>
+            <p>This visualization demonstrates a custom task scheduler that mimics JavaScript's event loop behavior:</p>
+            <div class="code-block">
+class EventLoopProject {
+    constructor() {
+        this.taskQueue = [];
+        this.isProcessing = false;
+    }
+
+    addTask(task, priority = 'normal') {
+        this.taskQueue.push({ task, priority });
+        this.processQueue();
+    }
+
+    async processQueue() {
+        if (this.isProcessing) return;
+        this.isProcessing = true;
+        
+        while (this.taskQueue.length > 0) {
+            const { task } = this.taskQueue.shift();
+            await task();
+            // Yield to event loop between tasks
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+        
+        this.isProcessing = false;
+    }
+}
+            </div>
+            <p>Tasks are added to the queue with different priorities. The scheduler processes them one by one, yielding control back to the browser between tasks to prevent blocking the UI.</p>
+            <p>This is similar to how JavaScript's event loop handles asynchronous operations, allowing the browser to remain responsive even during heavy processing.</p>
+        </div>
+    </div>
+
+    <script>
+        class EventLoopProject {
+            constructor() {
+                this.taskQueue = [];
+                this.isProcessing = false;
+                this.completedTasks = 0;
+                this.updateCallback = null;
+            }
+
+            onUpdate(callback) {
+                this.updateCallback = callback;
+            }
+
+            addTask(task, priority = 'normal', name = 'Unnamed Task') {
+                const taskId = Date.now() + Math.random();
+                this.taskQueue.push({ 
+                    task, 
+                    priority, 
+                    name,
+                    id: taskId,
+                    status: 'queued'
+                });
+                
+                if (this.updateCallback) {
+                    this.updateCallback();
+                }
+                
+                this.processQueue();
+                return taskId;
+            }
+
+            async processQueue() {
+                if (this.isProcessing) return;
+                this.isProcessing = true;
+                
+                while (this.taskQueue.length > 0) {
+                    const currentTask = this.taskQueue[0];
+                    currentTask.status = 'executing';
+                    
+                    if (this.updateCallback) {
+                        this.updateCallback();
+                    }
+                    
+                    await currentTask.task();
+                    
+                    // Remove the completed task
+                    this.taskQueue.shift();
+                    this.completedTasks++;
+                    
+                    if (this.updateCallback) {
+                        this.updateCallback();
+                    }
+                    
+                    // Yield to event loop between tasks
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+                
+                this.isProcessing = false;
+                
+                if (this.updateCallback) {
+                    this.updateCallback();
+                }
+            }
+
+            clearQueue() {
+                this.taskQueue = [];
+                if (this.updateCallback) {
+                    this.updateCallback();
+                }
+            }
+
+            getQueueLength() {
+                return this.taskQueue.length;
+            }
+
+            getCompletedTasks() {
+                return this.completedTasks;
+            }
+
+            isExecuting() {
+                return this.isProcessing;
+            }
+
+            getTasks() {
+                return [...this.taskQueue];
+            }
+        }
+
+        // UI Implementation
+        document.addEventListener('DOMContentLoaded', function() {
+            const scheduler = new EventLoopProject();
+            const taskQueueElement = document.getElementById('taskQueue');
+            const queueCountElement = document.getElementById('queueCount');
+            const completedCountElement = document.getElementById('completedCount');
+            const executingCountElement = document.getElementById('executingCount');
+            
+            // Task templates
+            const taskTemplates = [
+                { name: "Data Processing", duration: 1500 },
+                { name: "Image Rendering", duration: 2000 },
+                { name: "API Call", duration: 1200 },
+                { name: "Calculation", duration: 800 },
+                { name: "File Upload", duration: 2500 },
+                { name: "Database Query", duration: 1800 }
+            ];
+            
+            // Update UI function
+            function updateUI() {
+                const queueLength = scheduler.getQueueLength();
+                const completedTasks = scheduler.getCompletedTasks();
+                const isExecuting = scheduler.isExecuting();
+                const tasks = scheduler.getTasks();
+                
+                // Update counters
+                queueCountElement.textContent = queueLength;
+                completedCountElement.textContent = completedTasks;
+                executingCountElement.textContent = isExecuting ? 1 : 0;
+                
+                // Update task queue display
+                if (tasks.length === 0) {
+                    taskQueueElement.innerHTML = '<div class="empty-queue">No tasks in queue. Add some tasks to get started!</div>';
+                } else {
+                    taskQueueElement.innerHTML = '';
+                    tasks.forEach(task => {
+                        const taskElement = document.createElement('div');
+                        taskElement.className = `task ${task.priority}-priority ${task.status === 'executing' ? 'executing' : ''}`;
+                        taskElement.innerHTML = `
+                            <div class="task-info">
+                                <div class="task-name">${task.name}</div>
+                                <div class="task-priority">Priority: ${task.priority}</div>
+                            </div>
+                            <div class="task-status">${task.status === 'executing' ? 'EXECUTING' : 'QUEUED'}</div>
+                        `;
+                        taskQueueElement.appendChild(taskElement);
+                    });
+                }
+            }
+            
+            // Set up update callback
+            scheduler.onUpdate(updateUI);
+            
+            // Create a sample task
+            function createTask(name, duration, priority) {
+                return async function() {
+                    // Simulate work with a timeout
+                    await new Promise(resolve => setTimeout(resolve, duration));
+                };
+            }
+            
+            // Add task buttons
+            document.getElementById('addHighPriority').addEventListener('click', function() {
+                const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+                scheduler.addTask(
+                    createTask(template.name, template.duration, 'high'),
+                    'high',
+                    `High: ${template.name}`
+                );
+            });
+            
+            document.getElementById('addNormalPriority').addEventListener('click', function() {
+                const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+                scheduler.addTask(
+                    createTask(template.name, template.duration, 'normal'),
+                    'normal',
+                    `Normal: ${template.name}`
+                );
+            });
+            
+            document.getElementById('addLowPriority').addEventListener('click', function() {
+                const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+                scheduler.addTask(
+                    createTask(template.name, template.duration, 'low'),
+                    'low',
+                    `Low: ${template.name}`
+                );
+            });
+            
+            document.getElementById('addRandomTasks').addEventListener('click', function() {
+                const priorities = ['high', 'normal', 'low'];
+                for (let i = 0; i < 5; i++) {
+                    const priority = priorities[Math.floor(Math.random() * priorities.length)];
+                    const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+                    
+                    scheduler.addTask(
+                        createTask(template.name, template.duration, priority),
+                        priority,
+                        `${priority.charAt(0).toUpperCase() + priority.slice(1)}: ${template.name}`
+                    );
+                }
+            });
+            
+            document.getElementById('clearQueue').addEventListener('click', function() {
+                scheduler.clearQueue();
+            });
+            
+            // Initial UI update
+            updateUI();
+        });
+    </script>
+</body>
+</html>
