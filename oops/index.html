@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Student Management — OOP (Desktop)</title>
+<style>
+  :root{
+    --bg: #f3f6f9;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --danger: #ef4444;
+    --success: #10b981;
+    --glass: rgba(255,255,255,0.6);
+    --shadow: 0 10px 25px rgba(18,38,63,0.08);
+  }
+  [data-theme="dark"]{
+    --bg: #0b1220;
+    --card: #071126;
+    --text: #e6eef8;
+    --muted: #9aa7bf;
+    --accent: #60a5fa;
+    --danger: #f87171;
+    --success: #34d399;
+    --glass: rgba(255,255,255,0.03);
+    --shadow: 0 10px 25px rgba(0,0,0,0.6);
+  }
+
+  /* Desktop container */
+  body{
+    margin:0;
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    background: linear-gradient(180deg,var(--bg), #eaf2ff 60%);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    padding:36px;
+  }
+
+  .wrap {
+    width: 1000px;            /* desktop fixed width */
+    margin: 0 auto;
+  }
+
+  header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  header h1{
+    margin:0;
+    font-size:26px;
+    letter-spacing:0.2px;
+  }
+  .controls {
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border-radius:12px;
+    padding:18px;
+    box-shadow: var(--shadow);
+    margin-bottom:20px;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{ transform: translateY(-3px); }
+
+  /* Form layout */
+  .form-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 120px;
+    gap:12px;
+    align-items:center;
+  }
+  input[type="text"], input[type="number"], select {
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid #e6e9ee;
+    font-size:14px;
+    width:100%;
+    box-sizing:border-box;
+  }
+  [data-theme="dark"] input[type="text"], [data-theme="dark"] input[type="number"], [data-theme="dark"] select{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:var(--text);
+  }
+
+  .btn {
+    padding:10px 12px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+    font-size:14px;
+  }
+  .btn-primary { background:var(--accent); color:white; }
+  .btn-ghost { background:transparent; border:1px solid rgba(0,0,0,0.06); }
+  .btn-danger { background:var(--danger); color:white; }
+  .tiny { padding:8px 10px; font-size:13px; border-radius:6px; }
+
+  /* Table */
+  .table-wrap { overflow:auto; max-height:460px; }
+  table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+    min-width:920px;
+  }
+  th, td {
+    padding:12px 14px;
+    text-align:left;
+    border-bottom:1px solid rgba(0,0,0,0.04);
+    font-size:14px;
+  }
+  th {
+    position:sticky;
+    top:0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+    backdrop-filter: blur(4px);
+    z-index:5;
+  }
+  [data-theme="dark"] th { background: rgba(255,255,255,0.02); }
+  .muted { color:var(--muted); font-weight:500; }
+
+  .actions { display:flex; gap:8px; align-items:center; }
+  .pill { padding:6px 8px; border-radius:999px; font-size:13px; border:1px solid rgba(0,0,0,0.06); background:var(--glass); }
+
+  /* Toast */
+  .toast {
+    position:fixed;
+    right:28px;
+    bottom:28px;
+    padding:12px 16px;
+    border-radius:10px;
+    color:white;
+    font-weight:600;
+    display:none;
+    box-shadow:0 10px 30px rgba(2,6,23,0.4);
+  }
+  .toast.show{ display:block; animation:toastIn .28s ease; }
+  .toast.success { background:var(--success); }
+  .toast.error { background:var(--danger); }
+  @keyframes toastIn { from { transform:translateY(14px); opacity:0 } to { transform:none; opacity:1 } }
+
+  /* Search & sort */
+  .toolbar { display:flex; gap:12px; align-items:center; }
+  .searchbox { width:300px; display:flex; gap:8px; align-items:center; border-radius:10px; padding:6px; border:1px solid #e2e8f0; background:var(--glass); }
+  .searchbox input { border:none; outline:none; background:transparent; padding:6px; width:100%; }
+  .sorts { display:flex; gap:6px; }
+
+  /* Empty row */
+  .empty { padding:36px; text-align:center; color:var(--muted) }
+
+  /* Edit modal (simple inline panel) */
+  .edit-panel {
+    position:fixed;
+    right:40px;
+    top:90px;
+    width:380px;
+    z-index:40;
+    background:var(--card);
+    padding:16px;
+    border-radius:12px;
+    box-shadow:0 20px 50px rgba(2,6,23,0.2);
+    display:none;
+  }
+  .edit-panel.show { display:block; }
+
+  /* small helpers */
+  .flex { display:flex; gap:10px; align-items:center; }
+  .right { margin-left:auto; }
+  .small-muted { font-size:13px; color:var(--muted) }
+
+  /* Desktop-only note: hide responsive niceties */
+  @media (max-width:1000px){
+    body{ padding:18px }
+    .wrap{ width:95% }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+
+  <header>
+    <div>
+      <h1>🎓 Student Management — OOP (Desktop)</h1>
+      <div class="small-muted">Add, edit, delete, search, sort & save (localStorage)</div>
+    </div>
+
+    <div class="controls">
+      <div class="toolbar">
+        <div class="searchbox" title="Search by name or roll">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:.6"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2"/></svg>
+          <input id="searchInput" placeholder="Search students..." />
+        </div>
+
+        <div class="sorts">
+          <select id="sortField" class="tiny">
+            <option value="roll">Sort: Roll</option>
+            <option value="name">Sort: Name</option>
+            <option value="age">Sort: Age</option>
+          </select>
+          <button id="sortDirBtn" class="btn tiny btn-ghost" title="Toggle sort direction">Asc</button>
+        </div>
+      </div>
+
+      <div style="width:12px"></div>
+
+      <button id="darkToggle" class="btn tiny btn-ghost">Dark</button>
+      <button id="clearBtn" class="btn tiny btn-danger" title="Clear all students">Clear All</button>
+    </div>
+  </header>
+
+  <!-- Add Card -->
+  <section class="card" aria-label="Add student">
+    <form id="addForm" autocomplete="off">
+      <div class="form-grid">
+        <input type="text" id="nameInput" placeholder="Student Name (required)" required />
+        <input type="number" id="ageInput" placeholder="Age (required)" min="1" max="120" required />
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary" id="addBtn" type="submit">Add Student</button>
+          <div class="pill small-muted" id="totalCount">Total: 0</div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- Table Card -->
+  <section class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div class="muted">Students List</div>
+      </div>
+      <div class="muted small-muted">Double-click NAME to edit quickly</div>
+    </div>
+
+    <div class="table-wrap" id="tableWrap">
+      <table aria-live="polite">
+        <thead>
+          <tr>
+            <th style="width:100px">Roll</th>
+            <th style="width:360px">Name</th>
+            <th style="width:120px">Age</th>
+            <th style="width:220px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- rows inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- Inline Edit Panel -->
+<div class="edit-panel" id="editPanel" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+  <h3 id="editTitle" style="margin-top:0;margin-bottom:6px">Edit Student</h3>
+  <div class="small-muted" id="editSub">Roll: —</div>
+  <div style="height:12px"></div>
+  <input type="text" id="editName" placeholder="Name" />
+  <div style="height:8px"></div>
+  <input type="number" id="editAge" placeholder="Age" />
+  <div style="height:12px"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button class="btn btn-ghost" id="cancelEdit">Cancel</button>
+    <button class="btn btn-primary" id="saveEdit">Save</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================
+   OOP Classes: Student + Manager
+   ========================= */
+
+class Student {
+  constructor(roll, name, age) {
+    this.roll = roll;
+    this.name = name;
+    this.age = Number(age);
+  }
+}
+
+class StudentManager {
+  constructor(storageKey = "oop_students_v1") {
+    this.storageKey = storageKey;
+    this.students = [];
+    this.rollCounter = 1;
+    this.load();
+  }
+
+  add(name, age) {
+    const s = new Student(this.rollCounter++, name.trim(), Number(age));
+    this.students.push(s);
+    this.save();
+    return s;
+  }
+
+  update(roll, { name, age }) {
+    const idx = this.students.findIndex(x => x.roll === roll);
+    if (idx === -1) return false;
+    this.students[idx].name = name.trim();
+    this.students[idx].age = Number(age);
+    this.save();
+    return true;
+  }
+
+  delete(roll) {
+    const before = this.students.length;
+    this.students = this.students.filter(s => s.roll !== roll);
+    const after = this.students.length;
+    if (before !== after) this.save();
+    return before !== after;
+  }
+
+  clearAll() {
+    this.students = [];
+    this.rollCounter = 1;
+    localStorage.removeItem(this.storageKey);
+  }
+
+  getAll() {
+    return [...this.students]; // return copy
+  }
+
+  findByNameOrRoll(query) {
+    const q = String(query).trim().toLowerCase();
+    if (!q) return this.getAll();
+    return this.students.filter(s =>
+      String(s.roll).includes(q) ||
+      s.name.toLowerCase().includes(q)
+    );
+  }
+
+  save() {
+    const payload = {
+      rollCounter: this.rollCounter,
+      students: this.students
+    };
+    localStorage.setItem(this.storageKey, JSON.stringify(payload));
+  }
+
+  load() {
+    try {
+      const raw = localStorage.getItem(this.storageKey);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      this.rollCounter = data.rollCounter || 1;
+      this.students = (data.students || []).map(s => new Student(s.roll, s.name, s.age));
+    } catch (e) {
+      console.error("Failed to load students:", e);
+    }
+  }
+}
+
+/* =========================
+   App Logic & UI
+   ========================= */
+
+const manager = new StudentManager();
+
+const elements = {
+  tableBody: document.getElementById("tableBody"),
+  addForm: document.getElementById("addForm"),
+  nameInput: document.getElementById("nameInput"),
+  ageInput: document.getElementById("ageInput"),
+  totalCount: document.getElementById("totalCount"),
+  searchInput: document.getElementById("searchInput"),
+  sortField: document.getElementById("sortField"),
+  sortDirBtn: document.getElementById("sortDirBtn"),
+  darkToggle: document.getElementById("darkToggle"),
+  clearBtn: document.getElementById("clearBtn"),
+  tableWrap: document.getElementById("tableWrap"),
+  editPanel: document.getElementById("editPanel"),
+  editName: document.getElementById("editName"),
+  editAge: document.getElementById("editAge"),
+  editSub: document.getElementById("editSub"),
+  saveEdit: document.getElementById("saveEdit"),
+  cancelEdit: document.getElementById("cancelEdit"),
+  toast: document.getElementById("toast")
+};
+
+let sortField = "roll";
+let sortDir = "asc";
+let editingRoll = null;
+
+/* Helper: show toast */
+function showToast(msg, type="success", ms=2200){
+  const t = elements.toast;
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(()=> { t.className = "toast"; }, ms);
+}
+
+/* Render table rows */
+function renderTable() {
+  let rows = manager.findByNameOrRoll(elements.searchInput.value);
+
+  // Sorting
+  rows.sort((a,b) => {
+    let A = a[sortField], B = b[sortField];
+    if (typeof A === "string") { A = A.toLowerCase(); B = String(B).toLowerCase(); }
+    if (A < B) return sortDir === "asc" ? -1 : 1;
+    if (A > B) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  elements.tableBody.innerHTML = "";
+
+  if (!rows.length) {
+    elements.tableBody.innerHTML = `<tr><td colspan="4" class="empty">No students found — add one using the form above.</td></tr>`;
+  } else {
+    for (const s of rows) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${s.roll}</strong></td>
+        <td style="cursor:default"><span class="name-cell">${escapeHtml(s.name)}</span></td>
+        <td>${s.age}</td>
+        <td>
+          <div class="actions">
+            <button class="btn tiny btn-ghost" data-edit="${s.roll}">Edit</button>
+            <button class="btn tiny" data-copy="${s.roll}">Copy</button>
+            <button class="btn tiny btn-danger" data-delete="${s.roll}">Delete</button>
+          </div>
+        </td>
+      `;
+      // dblclick name -> quick edit
+      tr.querySelector(".name-cell").addEventListener("dblclick", ()=> openEditPanel(s.roll));
+      elements.tableBody.appendChild(tr);
+
+      // attach actions
+      tr.querySelector('[data-edit]')?.addEventListener("click", ()=> openEditPanel(s.roll));
+      tr.querySelector('[data-copy]')?.addEventListener("click", ()=> {
+        navigator.clipboard?.writeText(`${s.roll} • ${s.name} • Age ${s.age}`).then(()=> showToast("Copied to clipboard","success"));
+      });
+      tr.querySelector('[data-delete]')?.addEventListener("click", ()=> {
+        if (!confirm(`Delete student ${s.name} (Roll ${s.roll})?`)) return;
+        manager.delete(s.roll);
+        showToast("Student deleted","error");
+        updateCount();
+        renderTable();
+      });
+    }
+  }
+}
+
+/* Escape HTML (small helper) */
+function escapeHtml(unsafe) {
+  return String(unsafe)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+/* Update total count */
+function updateCount(){
+  elements.totalCount.textContent = `Total: ${manager.getAll().length}`;
+}
+
+/* Add student handler */
+elements.addForm.addEventListener("submit", function(e){
+  e.preventDefault();
+  const name = elements.nameInput.value.trim();
+  const age = elements.ageInput.value.trim();
+  if (!name || !age) { showToast("Please enter name & age","error"); return; }
+  if (isNaN(Number(age)) || Number(age) <= 0) { showToast("Enter valid age","error"); return; }
+
+  const s = manager.add(name, age);
+  elements.nameInput.value = "";
+  elements.ageInput.value = "";
+  showToast(`Added ${s.name} (Roll ${s.roll})`);
+  updateCount();
+  renderTable();
+});
+
+/* Search (live) */
+elements.searchInput.addEventListener("input", ()=> renderTable());
+
+/* Sort controls */
+elements.sortField.addEventListener("change", (e)=> { sortField = e.target.value; renderTable(); });
+elements.sortDirBtn.addEventListener("click", ()=>{
+  sortDir = sortDir === "asc" ? "desc" : "asc";
+  elements.sortDirBtn.textContent = sortDir === "asc" ? "Asc" : "Desc";
+  renderTable();
+});
+
+/* Dark toggle */
+function readTheme(){
+  return document.documentElement.getAttribute("data-theme") || "light";
+}
+function writeTheme(t){
+  document.documentElement.setAttribute("data-theme", t === "dark" ? "dark" : "light");
+  elements.darkToggle.textContent = t === "dark" ? "Light" : "Dark";
+  localStorage.setItem("oop_theme_v1", t);
+}
+elements.darkToggle.addEventListener("click", ()=>{
+  const cur = readTheme();
+  const next = cur === "dark" ? "light" : "dark";
+  writeTheme(next);
+});
+(function initTheme(){
+  const saved = localStorage.getItem("oop_theme_v1") || "light";
+  writeTheme(saved);
+})();
+
+/* Clear all */
+elements.clearBtn.addEventListener("click", ()=>{
+  if (!confirm("Permanently clear all students? This cannot be undone.")) return;
+  manager.clearAll();
+  updateCount();
+  renderTable();
+  showToast("All students cleared","error");
+});
+
+/* Edit panel functions */
+function openEditPanel(roll){
+  const stu = manager.getAll().find(s => s.roll === roll);
+  if (!stu) return;
+  editingRoll = roll;
+  elements.editName.value = stu.name;
+  elements.editAge.value = stu.age;
+  elements.editSub.textContent = `Roll: ${stu.roll}`;
+  elements.editPanel.classList.add("show");
+  elements.editName.focus();
+}
+
+elements.cancelEdit.addEventListener("click", (e)=> {
+  e.preventDefault();
+  elements.editPanel.classList.remove("show");
+  editingRoll = null;
+});
+
+elements.saveEdit.addEventListener("click", (e)=> {
+  e.preventDefault();
+  const name = elements.editName.value.trim();
+  const age = elements.editAge.value.trim();
+  if (!name || !age) { showToast("Please enter valid name & age","error"); return; }
+  if (isNaN(Number(age)) || Number(age) <= 0) { showToast("Enter valid age","error"); return; }
+
+  manager.update(editingRoll, { name, age });
+  elements.editPanel.classList.remove("show");
+  showToast("Student updated","success");
+  editingRoll = null;
+  updateCount();
+  renderTable();
+});
+
+/* Keyboard: Esc to close edit */
+document.addEventListener("keydown", (e)=> {
+  if (e.key === "Escape") {
+    elements.editPanel.classList.remove("show");
+    editingRoll = null;
+  }
+});
+
+/* initial render */
+updateCount();
+renderTable();
+
+/* Utility: persist changes when panel closed automatically (save on blur) */
+elements.editName.addEventListener("keyup", (e)=> {
+  if (e.key === "Enter") elements.saveEdit.click();
+});
+
+/* small UX: keep table header sticky when scrolling inside table-wrap */
+elements.tableWrap.addEventListener("scroll", ()=> {/* nothing, just for native scroll */});
+
+/* Persist sorting & search preferences to localStorage for convenience */
+(function restorePrefs(){
+  try {
+    const prefs = JSON.parse(localStorage.getItem("oop_prefs_v1") || "{}");
+    if (prefs.sortField) { sortField = prefs.sortField; elements.sortField.value = sortField; }
+    if (prefs.sortDir) { sortDir = prefs.sortDir; elements.sortDirBtn.textContent = sortDir === "asc" ? "Asc" : "Desc"; }
+    if (prefs.search) { elements.searchInput.value = prefs.search; }
+  } catch(e){}
+})();
+
+window.addEventListener("beforeunload", ()=> {
+  localStorage.setItem("oop_prefs_v1", JSON.stringify({ sortField, sortDir, search: elements.searchInput.value }));
+});
+</script>
+
+</body>
+</html>
