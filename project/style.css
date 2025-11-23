@@ -26,3 +26,9 @@ body {
 #description {
   background-color: antiquewhite;
 }
+
+.nav-container{
+  background-color:whitesmoke;
+  align-items: center;
+  justify-content: space-between;
+}
