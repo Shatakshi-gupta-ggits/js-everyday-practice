@@ -47,14 +47,10 @@ class Cat extends Animal {}
 new Dog().speak();
 new Cat().speak();
 
-
-// ---
-
 // # ⚠️ JavaScript does **NOT** support Multiple Inheritance directly.
 
 // But we can simulate it using **mixins**.
 
-// ---
 
 // # ✅ **4. Multiple Inheritance (Using Mixins)**
 
@@ -75,9 +71,6 @@ Object.assign(Animal.prototype, CanRun, CanJump);
 const a = new Animal();
 a.run();
 a.jump();
-
-
-// ---
 
 // # 📌 Optional but useful: Hybrid & Multipath Inheritance
 

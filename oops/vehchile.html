@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inheritance Project Demo</title>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+
+    <h2>Vehicle Inheritance Example</h2>
+    <button onclick="showDetails()">Show Vehicle Details</button>
+
+    <p id="output"></p>
+
+    <script>
+        // Parent Class
+        class Vehicle {
+            constructor(name, speed) {
+                this.name = name;
+                this.speed = speed;
+            }
+
+            move() {
+                return `${this.name} is moving at ${this.speed} km/h`;
+            }
+        }
+
+        // Child Class (Single Inheritance)
+        class Car extends Vehicle {
+            constructor(name, speed, brand) {
+                super(name, speed);   // use parent constructor
+                this.brand = brand;
+            }
+
+            details() {
+                return `${this.brand} ${this.name} runs at ${this.speed} km/h`;
+            }
+        }
+
+        // Sub-child Class (Multilevel Inheritance)
+        class ElectricCar extends Car {
+            constructor(name, speed, brand, battery) {
+                super(name, speed, brand);
+                this.battery = battery;
+            }
+
+            charge() {
+                return `${this.brand} ${this.name} has a ${this.battery}% battery`;
+            }
+        }
+
+        // button function
+        function showDetails() {
+            const tesla = new ElectricCar("Model 3", 120, "Tesla", 85);
+
+            document.getElementById("output").innerHTML =
+                tesla.move() + "<br>" +
+                tesla.details() + "<br>" +
+                tesla.charge();
+        }
+    </script>
+
+</body>
+</html>
