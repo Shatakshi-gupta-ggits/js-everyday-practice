@@ -50,6 +50,6 @@
 // });
 
 
-// let arrfun = () => console.log("Hello World");
-// arrfun();
+let arrfun = () => console.log("Hello World");
+arrfun();
 
